@@ -26,20 +26,18 @@ export default function NotesClient({ tag }: NotesClientProps) {
     setPage(1);
   }, 500);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<FetchNotesResponse>({
     queryKey: ["notes", query, page, tag],
-    queryFn: () => fetchNotes( page, 12, tag === "all" ? undefined : (tag as NoteTag), query),
-    placeholderData: (prev: FetchNotesResponse | undefined) => {
-     return page > 1 ? prev : undefined;
-    },
+    queryFn: () => fetchNotes(page, 12, tag === "all" ? undefined : (tag as NoteTag), query),
+    placeholderData: (prev) => (page > 1 ? prev : undefined),
+  });
     // placeholderData: keepPreviousData,
     // keepPreviousData: true,
     // refetchOnWindowFocus: false,
-  });
 
-  // const notes = data?.notes ?? [];
-  // const totalPages = data?.totalPages ?? 0;
-    const { notes = [], totalPages = 0 } = data ?? {}
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 0;
+    // const { notes = [], totalPages = 0 } = data ?? {}
 
   return (
     <div className={css.app}>
