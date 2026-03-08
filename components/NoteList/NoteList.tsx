@@ -1,6 +1,6 @@
 import css from "./NoteList.module.css";
 import type { Note } from "../../types/note";
-import { deleteNote } from "@/lib/api";
+import { deleteNote } from "@/lib/api/clientApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import Modal from "../Modal/Modal";
@@ -77,4 +77,5 @@ export default function NoteList({ notes }: NoteListProps) {
       )}
     </>
   );
+
 }
