@@ -45,8 +45,10 @@ export default async function NotesPage({ params }: NotesPageProps) {
   // Prefetch даних для React Query
   await queryClient.prefetchQuery({
     queryKey: ["notes", "", 1, tag],
-    queryFn: () =>
-      fetchNotes(1, 12, tag === "all" ? undefined : (tag as NoteTag)),
+    queryFn: async () => {
+      const response = await fetchNotes(1, 12, tag === "all" ? undefined : (tag as NoteTag));
+      return response.data;
+    }
   });
 
   return (
