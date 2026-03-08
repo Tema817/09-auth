@@ -52,8 +52,8 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
-export const createNote = async (title: string, content: string, tag: string): Promise<Note> => {
-  const { data } = await api.post<Note>("/notes", { title, content, tag });
+export const createNote = async (note: { title: string; content: string; tag: string }): Promise<Note> => {
+  const { data } = await api.post<Note>("/notes", note);
   return data;
 };
 
