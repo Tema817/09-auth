@@ -111,10 +111,68 @@
 //   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 // };
 
+// import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
+// import { cookies } from "next/headers";
+// import { nextServer } from "@/lib/api/api"; // напряму axios-інстанс
+
+// export async function proxy(req: NextRequest) {
+//   const cookieStore = await cookies();
+//   const accessToken = cookieStore.get("accessToken")?.value;
+//   const refreshToken = cookieStore.get("refreshToken")?.value;
+
+//   const { pathname } = req.nextUrl;
+
+//   const isAuthRoute = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+//   const isPrivateRoute = pathname.startsWith("/profile") || pathname.startsWith("/notes");
+
+//   if (isAuthRoute && accessToken) {
+//     return NextResponse.redirect(new URL("/", req.url));
+//   }
+
+//   if (isPrivateRoute) {
+//     if (!accessToken) {
+//       if (refreshToken) {
+//         // Викликаємо бекенд напряму, щоб отримати повну відповідь з заголовками
+//         const response = await nextServer.get("/auth/session", { withCredentials: true });
+
+//         if (!response.data) {
+//           return NextResponse.redirect(new URL("/sign-in", req.url));
+//         }
+
+//         // Якщо бекенд повернув нові токени у Set-Cookie
+//         const res = NextResponse.next();
+//         const setCookieHeader = response.headers["set-cookie"];
+//         if (setCookieHeader) {
+//           // Тут треба розпарсити куки і записати їх у res.cookies
+//           // Наприклад, якщо бекенд повертає "accessToken=...; Path=/; HttpOnly"
+//           setCookieHeader.forEach((cookieStr: string) => {
+//             const [nameValue] = cookieStr.split(";");
+//             const [name, value] = nameValue.split("=");
+//             res.cookies.set(name.trim(), value.trim(), { httpOnly: true, path: "/" });
+//           });
+//         }
+//         return res;
+//       } else {
+//         return NextResponse.redirect(new URL("/sign-in", req.url));
+//       }
+//     }
+//   }
+
+//   return NextResponse.next();
+// }
+
+// export const config = {
+//   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+// };
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { nextServer } from "@/lib/api/api"; // напряму axios-інстанс
+import { checkSession } from "@/lib/api/serverApi";
+import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+
+type CookieOptions = Partial<ResponseCookie>;
 
 export async function proxy(req: NextRequest) {
   const cookieStore = await cookies();
@@ -133,25 +191,54 @@ export async function proxy(req: NextRequest) {
   if (isPrivateRoute) {
     if (!accessToken) {
       if (refreshToken) {
-        // Викликаємо бекенд напряму, щоб отримати повну відповідь з заголовками
-        const response = await nextServer.get("/auth/session", { withCredentials: true });
+        const response = await checkSession();
 
-        if (!response.data) {
+        if (!response?.data) {
           return NextResponse.redirect(new URL("/sign-in", req.url));
         }
 
-        // Якщо бекенд повернув нові токени у Set-Cookie
         const res = NextResponse.next();
-        const setCookieHeader = response.headers["set-cookie"];
+        const setCookieHeader = response.headers?.["set-cookie"];
+
         if (setCookieHeader) {
-          // Тут треба розпарсити куки і записати їх у res.cookies
-          // Наприклад, якщо бекенд повертає "accessToken=...; Path=/; HttpOnly"
-          setCookieHeader.forEach((cookieStr: string) => {
-            const [nameValue] = cookieStr.split(";");
-            const [name, value] = nameValue.split("=");
-            res.cookies.set(name.trim(), value.trim(), { httpOnly: true, path: "/" });
+          const cookiesArray = Array.isArray(setCookieHeader)
+            ? setCookieHeader
+            : [setCookieHeader];
+
+          cookiesArray.forEach((cookieStr) => {
+            const parts = cookieStr.split(";");
+            const [name, value] = parts[0].split("=");
+
+            const options: CookieOptions = { path: "/" };
+
+            parts.slice(1).forEach((attr) => {
+              const [k, v] = attr.trim().split("=");
+              switch (k.toLowerCase()) {
+                case "httponly":
+                  options.httpOnly = true;
+                  break;
+                case "secure":
+                  options.secure = true;
+                  break;
+                case "samesite":
+                  const val = v?.toLowerCase();
+                  if (val === "strict" || val === "lax" || val === "none") {
+                    options.sameSite = val;
+                  }
+                  break;
+                case "expires":
+                  options.expires = new Date(v);
+                  break;
+                case "path":
+                  options.path = v;
+                  break;
+              }
+            });
+
+            res.cookies.set(name.trim(), value.trim(), options);
           });
         }
+
         return res;
       } else {
         return NextResponse.redirect(new URL("/sign-in", req.url));

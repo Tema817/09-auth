@@ -144,8 +144,7 @@ export default async function ProfilePage() {
   let user;
 
   try {
-    const response = await getMe();
-    user = response.data;
+    user = await getMe();
   } catch {
     // Якщо getMe() повернув 401 або іншу помилку
     return (

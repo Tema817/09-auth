@@ -13,8 +13,7 @@ interface NoteModalPageProps {
 
 export async function generateMetadata({ params }: NoteModalPageProps): Promise<Metadata> {
   const { id } = await params;
-  const response = await fetchNoteById(id);
-  const note = response.data;
+  const note = await fetchNoteById(id);
   return {
     title: `Note ${note.title}`,
     description: `${note.content.slice(0, 30)}`,
@@ -41,8 +40,8 @@ export default async function NoteModalPage({ params }: NoteModalPageProps) {
   await queryClient.prefetchQuery({
     queryKey: ["note", id],
     queryFn: async () => {
-      const response = await fetchNoteById(id);
-      return response.data;
+      const note = await fetchNoteById(id);
+      return note;
     },
   });
 

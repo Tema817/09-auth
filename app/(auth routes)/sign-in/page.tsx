@@ -92,7 +92,7 @@ export default function SignInPage() {
     const password = formData.get("password") as string;
 
     try {
-      const user = await login(email, password);
+      const user = await login({ email, password });
       setUser(user);
       router.push("/profile");
     } catch {

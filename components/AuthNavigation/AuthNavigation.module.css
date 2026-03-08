@@ -5,9 +5,12 @@
 }
 
 .logoutButton {
-  background: transparent;
+  /* background: transparent;
   border: 1px solid white;
-  color: white;
+  color: white; */
+  background-color: #000;
+  color: #ff9000;
+  border: 1px solid;
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   cursor: pointer;
@@ -16,8 +19,10 @@
 }
 
 .logoutButton:hover {
-  background-color: white;
-  color: #333;
+  /* background-color: white;
+  color: #333; */
+  background-color: #ff9000;
+  color: #000;
 }
 
 .navigationItem {

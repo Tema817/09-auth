@@ -73,8 +73,8 @@ export const register = async (payload: { email: string; password: string }): Pr
   return data;
 };
 
-export const login = async (email: string, password: string): Promise<User> => {
-  const { data } = await nextServer.post<User>("/auth/login", { email, password });
+export const login = async (playload: { email: string, password: string }): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/login", playload);
   return data;
 };
 
