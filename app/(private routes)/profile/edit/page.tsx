@@ -305,7 +305,9 @@ export default function EditProfilePage() {
         const user = await getMe();
         setUsername(user.username);
         setEmail(user.email);
-        setAvatar(user.avatar ?? "https://ac.goit.global/default-avatar.png");
+        setAvatar(user.avatar && user.avatar.trim() !== ""
+          ? user.avatar
+          : "https://ac.goit.global/default-avatar.png");
       } catch {
         setError("Failed to load user data");
       }

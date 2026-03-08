@@ -82,7 +82,7 @@ import css from "./SignInPage.module.css";
 
 export default function SignInPage() {
   const router = useRouter();
-  const { setUser } = useAuthStore();
+  const setUser = useAuthStore((state) => state.setUser);
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

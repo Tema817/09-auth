@@ -70,10 +70,51 @@
 //   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
 // };
 
+// import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
+// import { cookies } from "next/headers";
+// import { checkSession } from "@/lib/api/serverApi";
+
+// export async function proxy(req: NextRequest) {
+//   const cookieStore = await cookies();
+//   const accessToken = cookieStore.get("accessToken")?.value;
+//   const refreshToken = cookieStore.get("refreshToken")?.value;
+
+//   const { pathname } = req.nextUrl;
+
+//   const isAuthRoute = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+//   const isPrivateRoute = pathname.startsWith("/profile") || pathname.startsWith("/notes");
+
+//   // Якщо користувач авторизований і йде на публічний маршрут → редірект на головну
+//   if (isAuthRoute && accessToken) {
+//     return NextResponse.redirect(new URL("/", req.url));
+//   }
+
+//   // Якщо користувач заходить на приватний маршрут
+//   if (isPrivateRoute) {
+//     if (!accessToken) {
+//       if (refreshToken) {
+//         const sessionValid = await checkSession();
+//         if (!sessionValid) {
+//           return NextResponse.redirect(new URL("/sign-in", req.url));
+//         }
+//       } else {
+//         return NextResponse.redirect(new URL("/sign-in", req.url));
+//       }
+//     }
+//   }
+
+//   return NextResponse.next();
+// }
+
+// export const config = {
+//   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+// };
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { cookies } from "next/headers";
-import { checkSession } from "@/lib/api/serverApi";
+import { nextServer } from "@/lib/api/api"; // напряму axios-інстанс
 
 export async function proxy(req: NextRequest) {
   const cookieStore = await cookies();
@@ -85,19 +126,33 @@ export async function proxy(req: NextRequest) {
   const isAuthRoute = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const isPrivateRoute = pathname.startsWith("/profile") || pathname.startsWith("/notes");
 
-  // Якщо користувач авторизований і йде на публічний маршрут → редірект на головну
   if (isAuthRoute && accessToken) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  // Якщо користувач заходить на приватний маршрут
   if (isPrivateRoute) {
     if (!accessToken) {
       if (refreshToken) {
-        const sessionValid = await checkSession();
-        if (!sessionValid) {
+        // Викликаємо бекенд напряму, щоб отримати повну відповідь з заголовками
+        const response = await nextServer.get("/auth/session", { withCredentials: true });
+
+        if (!response.data) {
           return NextResponse.redirect(new URL("/sign-in", req.url));
         }
+
+        // Якщо бекенд повернув нові токени у Set-Cookie
+        const res = NextResponse.next();
+        const setCookieHeader = response.headers["set-cookie"];
+        if (setCookieHeader) {
+          // Тут треба розпарсити куки і записати їх у res.cookies
+          // Наприклад, якщо бекенд повертає "accessToken=...; Path=/; HttpOnly"
+          setCookieHeader.forEach((cookieStr: string) => {
+            const [nameValue] = cookieStr.split(";");
+            const [name, value] = nameValue.split("=");
+            res.cookies.set(name.trim(), value.trim(), { httpOnly: true, path: "/" });
+          });
+        }
+        return res;
       } else {
         return NextResponse.redirect(new URL("/sign-in", req.url));
       }

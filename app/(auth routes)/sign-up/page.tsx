@@ -92,7 +92,7 @@ export default function SignUpPage() {
     const password = formData.get("password") as string;
 
     try {
-      const user = await register(email, password);
+      const user = await register({ email, password });
       setUser(user);
       router.push("/profile");
     } catch {

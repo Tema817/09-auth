@@ -13,9 +13,11 @@
   width: 100%;
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); */
   padding: 24px;
   text-align: left;
+  border-bottom: 4px solid #ff9000;
+  box-shadow: 0 14px 14px rgba(0, 0, 0, 0.5);
 }
 
 .formTitle {
@@ -63,9 +65,19 @@
   transition: border-color 0.2s ease;
 }
 
-.input:focus {
+/* .input:focus {
   border-color: #0d6efd;
   outline: none;
+} */
+
+input:hover::placeholder {
+  color: #ff9000;
+}
+
+input:focus {
+  border: 2px solid #ff9000;
+  outline: none;
+  font-weight: normal;
 }
 
 .profileInfo p {
@@ -77,9 +89,12 @@
   padding: 12px 24px;
   font-size: 18px;
   font-weight: 600;
-  background-color: #0d6efd;
-  color: white;
-  border: none;
+  /* background-color: #0d6efd; */
+  background-color: #ff9000;
+  color: #000;
+  /* color: white; */
+  /* border: none; */
+  border: 1px solid;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -88,7 +103,9 @@
 }
 
 .saveButton:hover {
-  background-color: #0b5ed7;
+  /* background-color: #0b5ed7; */
+  background-color: #000;
+  color: #ff9000;
 }
 
 .cancelButton {

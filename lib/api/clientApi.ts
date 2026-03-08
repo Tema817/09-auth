@@ -68,8 +68,8 @@ import { Note } from "@/types/note";
 import type { FetchNotesResponse, NoteTag } from "@/types/note";
 
 // ---- AUTH ----
-export const register = async (email: string, password: string): Promise<User> => {
-  const { data } = await nextServer.post<User>("/auth/register", { email, password });
+export const register = async (payload: { email: string; password: string }): Promise<User> => {
+  const { data } = await nextServer.post<User>("/auth/register", payload);
   return data;
 };
 

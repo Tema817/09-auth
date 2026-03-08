@@ -30,27 +30,28 @@ export default function NotePreviewClient({ id }: NotePreviewClientProps) {
 
   return (
     <Modal onClose={handleCloseModal}>
-      <div className={css.container}>
-        <div className={css.item}>
-          <div className={css.header}>
-            <h2>{note?.title}</h2>
+      {isLoading && <p>Loading, please wait...</p>}
+      {error && !note && <p>Something went wrong.</p>}
+      {note && (
+        <div className={css.container}>
+          <div className={css.item}>
+            <div className={css.header}>
+              <h2>{note?.title}</h2>
+            </div>
+            <p className={css.tag}>{note?.tag}</p>
+            <p className={css.content}>{note?.content}</p>
+            <p className={css.date}>
+              Created:{" "}
+              {note?.createdAt
+                ? new Date(note.createdAt).toLocaleDateString()
+                : ""}
+            </p>
+            <button onClick={handleCloseModal} className={css.backBtn}>
+              Go back
+            </button>
           </div>
-          <p className={css.tag}>{note?.tag}</p>
-          <p className={css.content}>{note?.content}</p>
-          <p className={css.date}>
-            Created:{" "}
-            {note?.createdAt
-              ? new Date(note.createdAt).toLocaleDateString()
-              : ""}
-          </p>
-          <button onClick={handleCloseModal} className={css.backBtn}>
-            Go back
-          </button>
         </div>
-
-        {isLoading && <p>Loading, please wait...</p>}
-        {error && !note && <p>Something went wrong.</p>}
-      </div>
+      )}
     </Modal>
   );
 }
