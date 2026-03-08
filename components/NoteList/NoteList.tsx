@@ -16,8 +16,8 @@ export default function NoteList({ notes }: NoteListProps) {
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { mutate } = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
+  const { mutate } = useMutation<Note, Error, string>({
+    mutationFn: (id) => deleteNote(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       setNoteToDelete(null);
@@ -61,7 +61,7 @@ export default function NoteList({ notes }: NoteListProps) {
             <div className={css.actions}>
               <button
                 className={css.confirm}
-                onClick={() => mutate(noteToDelete.id)}
+                onClick={() => noteToDelete?.id && mutate(noteToDelete.id)}
               >
                 Yes
               </button>

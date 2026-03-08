@@ -1,36 +1,100 @@
-import { nextServer as api } from "./api";
+// import { nextServer as api, nextServer } from "./api";
+// import { User } from "@/types/user";
+// import { Note } from "@/types/note";
+// import type { FetchNotesResponse, NoteTag } from "@/types/note";
+
+// // ---- AUTH ----
+// export const register = async (email: string, password: string): Promise<User> => {
+//   const { data } = await api.post<User>("/auth/register", { email, password });
+//   return data;
+// };
+
+// export const login = async (email: string, password: string): Promise<User> => {
+//   const { data } = await api.post<User>("/auth/login", { email, password });
+//   return data;
+// };
+
+// export const logout = async (): Promise<void> => {
+//   await api.post("/auth/logout");
+// };
+
+// export const checkSession = async (): Promise<User | null> => {
+//   const { data } = await api.get<User | null>("/auth/session");
+//   return data;
+// };
+
+// // ---- USER ----
+// export const getMe = async (): Promise<User> => {
+//   const { data } = await api.get<User>("/users/me");
+//   return data;
+// };
+
+// export const updateMe = async (payload: { username: string }): Promise<User> => {
+//   const res = await nextServer.patch<User>("/users/me", payload);
+//   return res.data;
+// };
+
+// // ---- NOTES ----
+// export const fetchNotes = async (
+//   page: number = 1,
+//   perPage: number = 12,
+//   tag?: NoteTag,
+//   search?: string,
+// ): Promise<FetchNotesResponse> => {
+//   const { data } = await api.get<FetchNotesResponse>("/notes", {
+//     params: { search, page, perPage, tag },
+//   });
+//   return data;
+// };
+
+// export const fetchNoteById = async (id: string): Promise<Note> => {
+//   const { data } = await api.get<Note>(`/notes/${id}`);
+//   return data;
+// };
+
+// export const createNote = async (note: { title: string; content: string; tag: string }): Promise<Note> => {
+//   const { data } = await api.post<Note>("/notes", note);
+//   return data;
+// };
+
+// export const deleteNote = async (id: string): Promise<Note> => {
+//   const { data } = await api.delete<Note>(`/notes/${id}`);
+//   return data;
+// };
+
+import { nextServer } from "./api";
 import { User } from "@/types/user";
 import { Note } from "@/types/note";
 import type { FetchNotesResponse, NoteTag } from "@/types/note";
 
 // ---- AUTH ----
 export const register = async (email: string, password: string): Promise<User> => {
-  const { data } = await api.post<User>("/auth/register", { email, password });
+  const { data } = await nextServer.post<User>("/auth/register", { email, password });
   return data;
 };
 
 export const login = async (email: string, password: string): Promise<User> => {
-  const { data } = await api.post<User>("/auth/login", { email, password });
+  const { data } = await nextServer.post<User>("/auth/login", { email, password });
   return data;
 };
 
 export const logout = async (): Promise<void> => {
-  await api.post("/auth/logout");
+  await nextServer.post("/auth/logout");
 };
 
 export const checkSession = async (): Promise<User | null> => {
-  const { data } = await api.get<User | null>("/auth/session");
+  const { data } = await nextServer.get<User | null>("/auth/session");
   return data;
 };
 
 // ---- USER ----
 export const getMe = async (): Promise<User> => {
-  const { data } = await api.get<User>("/users/me");
+  const { data } = await nextServer.get<User>("/users/me");
   return data;
 };
 
-export const updateMe = async (username: string): Promise<User> => {
-  const { data } = await api.patch<User>("/users/me", { username });
+export const updateMe = async (payload: { username: string }): Promise<User> => {
+  const { data } = await nextServer.patch<User>("/users/me", payload);
   return data;
 };
 
@@ -41,23 +105,23 @@ export const fetchNotes = async (
   tag?: NoteTag,
   search?: string,
 ): Promise<FetchNotesResponse> => {
-  const { data } = await api.get<FetchNotesResponse>("/notes", {
+  const { data } = await nextServer.get<FetchNotesResponse>("/notes", {
     params: { search, page, perPage, tag },
   });
   return data;
 };
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
-  const { data } = await api.get<Note>(`/notes/${id}`);
+  const { data } = await nextServer.get<Note>(`/notes/${id}`);
   return data;
 };
 
 export const createNote = async (note: { title: string; content: string; tag: string }): Promise<Note> => {
-  const { data } = await api.post<Note>("/notes", note);
+  const { data } = await nextServer.post<Note>("/notes", note);
   return data;
 };
 
 export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<Note>(`/notes/${id}`);
+  const { data } = await nextServer.delete<Note>(`/notes/${id}`);
   return data;
 };

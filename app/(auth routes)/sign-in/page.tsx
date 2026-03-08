@@ -94,7 +94,7 @@ export default function SignInPage() {
     try {
       const user = await login(email, password);
       setUser(user);
-      router.push("/notes/filter/all");
+      router.push("/profile");
     } catch {
       setError("Invalid credentials");
     }
