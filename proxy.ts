@@ -172,8 +172,6 @@ import { cookies } from "next/headers";
 import { checkSession } from "@/lib/api/serverApi";
 import type { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
-type CookieOptions = Partial<ResponseCookie>;
-
 export async function proxy(req: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
@@ -181,9 +179,12 @@ export async function proxy(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  const isAuthRoute = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
-  const isPrivateRoute = pathname.startsWith("/profile") || pathname.startsWith("/notes");
+  const isAuthRoute =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+  const isPrivateRoute =
+    pathname.startsWith("/profile") || pathname.startsWith("/notes");
 
+  // Якщо користувач вже автентифікований, не пускаємо на sign-in/sign-up
   if (isAuthRoute && accessToken) {
     return NextResponse.redirect(new URL("/", req.url));
   }
@@ -193,7 +194,7 @@ export async function proxy(req: NextRequest) {
       if (refreshToken) {
         const response = await checkSession();
 
-        if (!response?.data) {
+        if (!response) {
           return NextResponse.redirect(new URL("/sign-in", req.url));
         }
 
@@ -206,13 +207,15 @@ export async function proxy(req: NextRequest) {
             : [setCookieHeader];
 
           cookiesArray.forEach((cookieStr) => {
-            const parts = cookieStr.split(";");
-            const [name, value] = parts[0].split("=");
+            const parts = cookieStr.split(";").map((p) => p.trim());
 
-            const options: CookieOptions = { path: "/" };
+            const [nameValue] = parts;
+            const [name, value] = nameValue.split("=");
+
+            const options: Partial<ResponseCookie> = {};
 
             parts.slice(1).forEach((attr) => {
-              const [k, v] = attr.trim().split("=");
+              const [k, v] = attr.split("=");
               switch (k.toLowerCase()) {
                 case "httponly":
                   options.httpOnly = true;
@@ -221,21 +224,25 @@ export async function proxy(req: NextRequest) {
                   options.secure = true;
                   break;
                 case "samesite":
-                  const val = v?.toLowerCase();
-                  if (val === "strict" || val === "lax" || val === "none") {
-                    options.sameSite = val;
+                  if (v) {
+                    const val = v.toLowerCase();
+                    if (["strict", "lax", "none"].includes(val)) {
+                      options.sameSite = val as "strict" | "lax" | "none";
+                    }
                   }
                   break;
                 case "expires":
-                  options.expires = new Date(v);
+                  if (v) options.expires = new Date(v);
                   break;
                 case "path":
-                  options.path = v;
+                  if (v) options.path = v;
                   break;
               }
             });
 
-            res.cookies.set(name.trim(), value.trim(), options);
+            if (value) {
+              res.cookies.set(name, value, options);
+            }
           });
         }
 
