@@ -194,7 +194,7 @@ export async function proxy(req: NextRequest) {
       if (refreshToken) {
         const response = await checkSession();
 
-        if (!response) {
+        if (!response?.data) {
           return NextResponse.redirect(new URL("/sign-in", req.url));
         }
 
@@ -244,6 +244,11 @@ export async function proxy(req: NextRequest) {
               res.cookies.set(name, value, options);
             }
           });
+        }
+
+        // 🔑 Додана перевірка: якщо після поновлення користувач на публічному маршруті
+        if (isAuthRoute) {
+          return NextResponse.redirect(new URL("/", req.url));
         }
 
         return res;
