@@ -14,7 +14,7 @@ interface NotesPageProps {
 
 // SEO мета-дані
 export async function generateMetadata({ params }: NotesPageProps): Promise<Metadata> {
-  const tag = params.slug[0];
+  const tag = params.slug?.[0] ?? "all";
   const capitalizedTag = tag.charAt(0).toUpperCase() + tag.slice(1);
 
   return {
@@ -38,13 +38,13 @@ export async function generateMetadata({ params }: NotesPageProps): Promise<Meta
 
 // Сторінка з SSR prefetch
 export default async function NotesPage({ params }: NotesPageProps) {
-  const tag = params.slug[0];
+  const tag = params.slug?.[0] ?? "all";
 
   const queryClient = new QueryClient();
 
   // Prefetch даних для React Query
   await queryClient.prefetchQuery({
-    queryKey: ["notes", { page: 1, limit: 12, tag }],
+    queryKey: ["notes", "", 1, tag],
     queryFn: () =>
       fetchNotes(1, 12, tag === "all" ? undefined : (tag as NoteTag)),
   });
