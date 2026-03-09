@@ -12,7 +12,7 @@ export default function Footer() {
                         <a href="/"
                             target="_blank"
                             rel="noopener noreferrer">
-                            GitHub
+                            NoteHub
                         </a>
                     </p>
                 </div>
@@ -21,3 +21,4 @@ export default function Footer() {
     );
 
 }
+
